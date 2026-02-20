@@ -35,7 +35,7 @@ curl -X POST http://localhost:8000/summarize \
 
 
 ## Project Structure
-.
+
 ├── .env              
 ├── .gitignore        
 ├── README.md           
