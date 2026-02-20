@@ -36,8 +36,8 @@ curl -X POST http://localhost:8000/summarize \
 
 ## Project Structure
 .
-├── .env                # (Not in zip, user creates this)
-├── .gitignore          # (Ignore .venv, __pycache__, .env)
+├── .env              
+├── .gitignore        
 ├── README.md           
 ├── llm_client.py       
 ├── main.py             
