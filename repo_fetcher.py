@@ -4,7 +4,10 @@ import re
 import requests
 from typing import Dict, Any, List, Optional
 from urllib.parse import urlparse
+from cachetools import TTLCache
+import hashlib
 
+SNAPSHOT_CACHE = TTLCache(maxsize=100, ttl=3600)
 BASE_URL = "https://api.github.com"
 GITHUB_HEADERS = {"User-Agent": "RepoSummarizer/1.0"}
 if token := os.getenv("GITHUB_TOKEN"):
@@ -157,6 +160,21 @@ def build_snapshot(tree_data: Dict[str, Any], owner: str, repo: str) -> str:
     )
 
     return snapshot[:15000]  # Hard cap for LLM
+
+
+def get_cached_snapshot(owner: str, repo: str, branch: str = None) -> str:
+    branch = branch or get_default_branch(owner, repo)  # Show actual branch
+    cache_key = f"{owner}/{repo}/{branch}"
+
+    if cache_key in SNAPSHOT_CACHE:
+        print(f"CACHE HIT: {cache_key}")  # Debug
+        return SNAPSHOT_CACHE[cache_key]
+
+    print(f"CACHE MISS: {cache_key} → fetching...")  # Debug
+    tree = get_repo_tree(owner, repo, branch)
+    snapshot = build_snapshot(tree, owner, repo)
+    SNAPSHOT_CACHE[cache_key] = snapshot
+    return snapshot
 
 
 # Test helper

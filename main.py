@@ -8,7 +8,7 @@ import requests
 
 load_dotenv()
 
-from repo_fetcher import parse_github_url, get_repo_tree, build_snapshot
+from repo_fetcher import parse_github_url, get_cached_snapshot
 from llm_client import summarize_repo
 
 app = FastAPI(title="Repo Summarizer")
@@ -38,8 +38,7 @@ class ErrorResponse(BaseModel):
 async def summarize(request: SummarizeRequest):
     try:
         owner, repo, branch = parse_github_url(request.github_url)
-        tree = get_repo_tree(owner, repo, branch)
-        snapshot = build_snapshot(tree, owner, repo)
+        snapshot = get_cached_snapshot(owner, repo, branch)  # CACHED!
         llm_result = summarize_repo(snapshot)
         return SummarizeResponse(**llm_result).dict()
     except ValueError as e:
